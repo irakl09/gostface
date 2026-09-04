@@ -1,0 +1,945 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ghostface Candy Bowl — 3D Printed Scream Halloween Holder</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..900;1,9..40,400..900&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0a0a0c;
+      --bg-2: #121216;
+      --ink: #f4f0e8;
+      --ink-soft: #c8c2b6;
+      --mute: #7a756c;
+      --line: #2a2a30;
+      --accent: #e85a2b;
+      --accent-2: #d9351f;
+      --accent-3: #f58b4e;
+      --card-bg: #16161a;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--ink);
+      font-family: "DM Sans", system-ui, sans-serif;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.5;
+    }
+
+    /* Grain overlay */
+    .grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 100;
+      opacity: 0.04;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+    }
+
+    /* Floating background ghosts */
+    .ghosts-bg {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .ghost {
+      position: absolute;
+      opacity: 0;
+      will-change: transform, opacity;
+      filter: drop-shadow(0 0 12px rgba(255,255,255,0.15));
+    }
+
+    .ghost svg {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    @keyframes floatGhost {
+      0% {
+        transform: translateY(110vh) translateX(0) rotate(-8deg) scale(0.7);
+        opacity: 0;
+      }
+      8% {
+        opacity: 0.12;
+      }
+      50% {
+        opacity: 0.18;
+      }
+      92% {
+        opacity: 0.1;
+      }
+      100% {
+        transform: translateY(-30vh) translateX(40px) rotate(12deg) scale(1.1);
+        opacity: 0;
+      }
+    }
+
+    @keyframes floatGhostAlt {
+      0% {
+        transform: translateY(110vh) translateX(0) rotate(6deg) scale(0.6);
+        opacity: 0;
+      }
+      10% {
+        opacity: 0.09;
+      }
+      45% {
+        opacity: 0.15;
+      }
+      90% {
+        opacity: 0.08;
+      }
+      100% {
+        transform: translateY(-25vh) translateX(-50px) rotate(-10deg) scale(1.05);
+        opacity: 0;
+      }
+    }
+
+    .ghost:nth-child(odd) {
+      animation: floatGhost linear infinite;
+    }
+    .ghost:nth-child(even) {
+      animation: floatGhostAlt linear infinite;
+    }
+
+    /* NAV */
+    .nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 50;
+      padding: 24px 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: linear-gradient(to bottom, rgba(10,10,12,0.95), transparent);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      font-size: 15px;
+      color: var(--ink);
+      text-decoration: none;
+    }
+
+    .logo-dot {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: linear-gradient(180deg, var(--accent-2), var(--accent-3));
+      box-shadow: 0 4px 10px -2px rgba(232, 90, 43, 0.5);
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 32px;
+    }
+
+    .nav-links a {
+      color: var(--ink-soft);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: color 0.3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--ink);
+    }
+
+    .nav-cta {
+      background: var(--ink);
+      color: var(--bg);
+      border: none;
+      padding: 11px 20px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .nav-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px -6px rgba(244, 240, 232, 0.3);
+    }
+
+    /* HERO */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      padding: 140px 32px 80px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--mute);
+      font-weight: 500;
+      margin-bottom: 20px;
+    }
+
+    .eyebrow::before {
+      content: "";
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 0 3px rgba(232, 90, 43, 0.25);
+    }
+
+    .hero h1 {
+      font-weight: 700;
+      font-size: clamp(42px, 7vw, 84px);
+      letter-spacing: -0.035em;
+      line-height: 1.05;
+      max-width: 900px;
+      margin-bottom: 24px;
+    }
+
+    .hero h1 em {
+      font-style: italic;
+      font-weight: 800;
+      background: linear-gradient(135deg, var(--accent-2), var(--accent-3));
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+    }
+
+    .hero-sub {
+      font-size: 17px;
+      color: var(--ink-soft);
+      max-width: 540px;
+      margin-bottom: 40px;
+      line-height: 1.6;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, var(--accent-2), var(--accent));
+      color: #fff;
+      border: none;
+      padding: 14px 28px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      box-shadow: 0 12px 28px -8px rgba(232, 90, 43, 0.45);
+      transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 16px 32px -8px rgba(232, 90, 43, 0.55);
+    }
+
+    .btn-secondary {
+      background: transparent;
+      color: var(--ink);
+      border: 1px solid var(--line);
+      padding: 13px 26px;
+      border-radius: 999px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      text-decoration: none;
+      transition: border-color 0.3s, background 0.3s;
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--ink-soft);
+      background: rgba(255,255,255,0.04);
+    }
+
+    /* GALLERY - 3D Carousel */
+    .gallery-section {
+      padding: 100px 0 80px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .gallery-header {
+      text-align: center;
+      margin-bottom: 40px;
+      padding: 0 24px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .gallery-header h2 {
+      font-size: clamp(28px, 4vw, 48px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 12px;
+    }
+
+    .gallery-header p {
+      color: var(--ink-soft);
+      font-size: 15px;
+      max-width: 480px;
+      margin: 0 auto;
+    }
+
+    .carousel-wrap {
+      width: 100%;
+      height: 520px;
+      position: relative;
+      perspective: 1000px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      cursor: grab;
+    }
+
+    .carousel-wrap:active {
+      cursor: grabbing;
+    }
+
+    #drag-container, #spin-container {
+      position: relative;
+      display: flex;
+      margin: auto;
+      transform-style: preserve-3d;
+      transform: rotateX(-10deg);
+    }
+
+    #drag-container img {
+      transform-style: preserve-3d;
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(255,255,255,0.15);
+      -webkit-box-reflect: below 8px linear-gradient(transparent, transparent, rgba(0,0,0,0.35));
+      border: 1px solid rgba(255,255,255,0.08);
+      user-select: none;
+      pointer-events: none;
+    }
+
+    #drag-container img:hover {
+      box-shadow: 0 0 20px rgba(232, 90, 43, 0.45);
+    }
+
+    #drag-container p {
+      font-family: "DM Sans", system-ui, sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotateX(90deg);
+      color: var(--ink-soft);
+      white-space: nowrap;
+    }
+
+    #ground {
+      width: 900px;
+      height: 900px;
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotateX(90deg);
+      background: radial-gradient(center center, farthest-side, rgba(232,90,43,0.12), transparent);
+    }
+
+    @keyframes spin {
+      from { transform: rotateY(0deg); }
+      to { transform: rotateY(360deg); }
+    }
+    @keyframes spinRevert {
+      from { transform: rotateY(360deg); }
+      to { transform: rotateY(0deg); }
+    }
+
+    @media (max-width: 800px) {
+      .carousel-wrap { height: 380px; }
+    }
+
+    /* FEATURES */
+    .features {
+      padding: 80px 40px 100px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 24px;
+    }
+
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 32px 28px;
+      transition: border-color 0.3s, transform 0.3s;
+    }
+
+    .feature-card:hover {
+      border-color: rgba(232, 90, 43, 0.4);
+      transform: translateY(-4px);
+    }
+
+    .feature-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, rgba(232,90,43,0.2), rgba(217,53,31,0.1));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 18px;
+    }
+
+    .feature-card h3 {
+      font-size: 17px;
+      font-weight: 650;
+      margin-bottom: 8px;
+      letter-spacing: -0.01em;
+    }
+
+    .feature-card p {
+      font-size: 14px;
+      color: var(--ink-soft);
+      line-height: 1.55;
+    }
+
+    /* PRODUCT DETAIL */
+    .product {
+      padding: 60px 40px 120px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+
+    .product-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: center;
+    }
+
+    @media (max-width: 800px) {
+      .product-inner {
+        grid-template-columns: 1fr;
+      }
+      .nav-links { display: none; }
+    }
+
+    .product-image {
+      border-radius: 24px;
+      overflow: hidden;
+      border: 1px solid var(--line);
+      background: var(--card-bg);
+    }
+
+    .product-image img {
+      width: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .product-info h2 {
+      font-size: clamp(28px, 3.5vw, 40px);
+      font-weight: 700;
+      letter-spacing: -0.03em;
+      margin-bottom: 16px;
+    }
+
+    .product-info .price {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--accent-3);
+      margin-bottom: 20px;
+    }
+
+    .product-info p {
+      color: var(--ink-soft);
+      font-size: 15px;
+      line-height: 1.65;
+      margin-bottom: 24px;
+    }
+
+    .specs {
+      list-style: none;
+      margin-bottom: 32px;
+    }
+
+    .specs li {
+      display: flex;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 14px;
+      color: var(--ink-soft);
+    }
+
+    .specs li strong {
+      color: var(--ink);
+      min-width: 110px;
+      font-weight: 600;
+    }
+
+    /* PRINT SETTINGS */
+    .settings {
+      background: var(--bg-2);
+      border-radius: 28px;
+      padding: 48px 40px;
+      margin: 0 40px 100px;
+      max-width: 1100px;
+      margin-left: auto;
+      margin-right: auto;
+      border: 1px solid var(--line);
+    }
+
+    .settings h2 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 28px;
+      letter-spacing: -0.02em;
+    }
+
+    .settings-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .setting-item {
+      background: rgba(255,255,255,0.03);
+      border-radius: 14px;
+      padding: 20px;
+      border: 1px solid var(--line);
+    }
+
+    .setting-item .label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--mute);
+      margin-bottom: 6px;
+    }
+
+    .setting-item .value {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    /* FOOTER */
+    footer {
+      padding: 40px;
+      text-align: center;
+      border-top: 1px solid var(--line);
+      color: var(--mute);
+      font-size: 13px;
+    }
+
+    footer a {
+      color: var(--ink-soft);
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="grain"></div>
+
+  <!-- Floating ghosts background -->
+  <div class="ghosts-bg" id="ghostsBg" aria-hidden="true"></div>
+
+  <!-- NAV -->
+  <nav class="nav">
+    <a href="#" class="logo">
+      <span class="logo-dot"></span>
+      GHOSTFACE CANDY BOWL
+    </a>
+    <ul class="nav-links">
+      <li><a href="#gallery">Gallery</a></li>
+      <li><a href="#features">Features</a></li>
+      <li><a href="#product">Details</a></li>
+      <li><a href="#settings">Print Settings</a></li>
+    </ul>
+    <a href="https://cults3d.com/en/3d-model/home/3d-printed-ghostface-candy-bowl-scream-halloween-holder" class="nav-cta" target="_blank" rel="noopener">
+      Download on Cults3D
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+        <line x1="7" y1="17" x2="17" y2="7" />
+        <polyline points="7 7 17 7 17 17" />
+      </svg>
+    </a>
+  </nav>
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="eyebrow">3D Print · Scream · Halloween</div>
+    <h1>Iconic <em>Ghostface</em><br>Candy Bowl</h1>
+    <p class="hero-sub">
+      The legendary Ghostface holds a deep bowl ready for candy, treats or a spooky candle. Perfect Halloween centerpiece or year-round horror décor for fans of the Scream franchise.
+    </p>
+    <div class="hero-actions">
+      <a href="https://cults3d.com/en/3d-model/home/3d-printed-ghostface-candy-bowl-scream-halloween-holder" class="btn-primary" target="_blank" rel="noopener">
+        Get the Files on Cults3D
+      </a>
+      <a href="#gallery" class="btn-secondary">View Gallery</a>
+    </div>
+  </section>
+
+  <!-- GALLERY -->
+  <section class="gallery-section" id="gallery">
+    <div class="gallery-header">
+      <h2>Real Prints & Setups</h2>
+      <p>Candy, chocolate bars, candles or empty — drag to spin the 3D carousel.</p>
+    </div>
+
+    <div class="carousel-wrap">
+      <div id="drag-container">
+        <div id="spin-container">
+          <img src="8342.jpg" alt="Ghostface candy bowl with chocolate bars">
+          <img src="8347.png" alt="Ghostface candy bowl with Scream DVD">
+          <img src="8348.png" alt="Ghostface candy bowl with yellow candies">
+          <img src="8341.jpg" alt="Ghostface candy bowl with scary movie candle">
+          <img src="8327.webp" alt="Ghostface candy bowl filled with treats">
+          <img src="8325.webp" alt="Ghostface candy bowl empty on table">
+          <img src="8328.jpg" alt="Ghostface candy bowl dramatic smoke">
+          <img src="8324.webp" alt="Ghostface candy bowl on 3D printer">
+          <img src="8326.webp" alt="Ghostface candy bowl on cutting mat">
+          <img src="8344.jpg" alt="Ghostface candy bowl 3D model">
+          <p>Ghostface Candy Bowl</p>
+        </div>
+        <div id="ground"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FEATURES -->
+  <section class="features" id="features">
+    <div class="gallery-header" style="margin-bottom:40px">
+      <h2>Designed for Impact</h2>
+      <p>Every detail crafted for printability and presence.</p>
+    </div>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">🎭</div>
+        <h3>Detailed Mask & Robe</h3>
+        <p>Sharp Ghostface features with flowing robe folds that look great under any light.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">💪</div>
+        <h3>Strong Open Arms</h3>
+        <p>Wide, sturdy arms that securely hold the deep candy bowl.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🕯️</div>
+        <h3>Holds Plenty of Treats</h3>
+        <p>Perfect for chocolate bars, wrapped candy, small snacks or even a large candle.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🏠</div>
+        <h3>Stable Base</h3>
+        <p>Wide balanced footprint so it stays put even when full of candy.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCT -->
+  <section class="product" id="product">
+    <div class="product-inner">
+      <div class="product-image">
+        <img src="8342.jpg" alt="Ghostface candy bowl filled with chocolate" />
+      </div>
+      <div class="product-info">
+        <h2>3D Printed Ghostface<br>Candy Bowl</h2>
+        <div class="price">$2–4</div>
+        <p>
+          The iconic Ghostface from the Scream movies holds a deep bowl with open arms. Perfect for Halloween candy, chocolate bars, or even a scented candle. Ideal doorstep decoration or party centerpiece for horror fans.
+        </p>
+        <ul class="specs">
+          <li><strong>Format</strong> STL / 3MF files</li>
+          <li><strong>Author</strong> Agenty009</li>
+          <li><strong>License</strong> Commercial use allowed</li>
+          <li><strong>Material</strong> PLA recommended (black body + white mask)</li>
+          <li><strong>Print time</strong> ~8–16 hours</li>
+        </ul>
+        <a href="https://cults3d.com/en/3d-model/home/3d-printed-ghostface-candy-bowl-scream-halloween-holder" class="btn-primary" target="_blank" rel="noopener">
+          Download on Cults3D
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRINT SETTINGS -->
+  <section class="settings" id="settings">
+    <h2>Recommended Print Settings</h2>
+    <div class="settings-grid">
+      <div class="setting-item">
+        <div class="label">Layer Height</div>
+        <div class="value">0.16 – 0.2 mm</div>
+      </div>
+      <div class="setting-item">
+        <div class="label">Infill</div>
+        <div class="value">15 – 20%</div>
+      </div>
+      <div class="setting-item">
+        <div class="label">Wall Loops</div>
+        <div class="value">3 – 4</div>
+      </div>
+      <div class="setting-item">
+        <div class="label">Supports</div>
+        <div class="value">Yes (tree recommended)</div>
+      </div>
+      <div class="setting-item">
+        <div class="label">Orientation</div>
+        <div class="value">Standing upright</div>
+      </div>
+      <div class="setting-item">
+        <div class="label">Nozzle</div>
+        <div class="value">0.4 mm</div>
+      </div>
+      <div class="setting-item">
+        <div class="label">Material</div>
+        <div class="value">PLA (black + white)</div>
+      </div>
+      <div class="setting-item">
+        <div class="label">Post-processing</div>
+        <div class="value">Remove supports, light sand</div>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      Design by <a href="https://cults3d.com/en/users/Agenty009" target="_blank" rel="noopener">Agenty009</a> on Cults3D · 
+      <a href="https://cults3d.com/en/3d-model/home/3d-printed-ghostface-candy-bowl-scream-halloween-holder" target="_blank" rel="noopener">Original listing</a>
+    </p>
+  </footer>
+
+  <script>
+    // Soft floating Ghostface-style silhouettes in the background
+    (function () {
+      const container = document.getElementById("ghostsBg");
+      if (!container) return;
+
+      const ghostSVG = `
+        <svg viewBox="0 0 64 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M32 4C18 4 8 16 8 32v36c0 4 3 6 6 4l6-4c2-1 4 0 5 2l3 5c1 2 3 2 4 0l3-5c1-2 3-3 5-2l6 4c3 2 6 0 6-4V32C50 16 46 4 32 4z" fill="rgba(255,255,255,0.85)"/>
+          <ellipse cx="22" cy="30" rx="5" ry="7" fill="#0a0a0c"/>
+          <ellipse cx="42" cy="30" rx="5" ry="7" fill="#0a0a0c"/>
+          <path d="M32 42c-4 0-7 4-7 8 0 1 1 2 2 1 2-1 4-2 5-2s3 1 5 2c1 1 2 0 2-1 0-4-3-8-7-8z" fill="#0a0a0c"/>
+        </svg>
+      `;
+
+      const count = 9;
+      for (let i = 0; i < count; i++) {
+        const el = document.createElement("div");
+        el.className = "ghost";
+        el.innerHTML = ghostSVG;
+
+        const size = 48 + Math.random() * 90;
+        el.style.width = size + "px";
+        el.style.height = size * 1.25 + "px";
+        el.style.left = Math.random() * 100 + "%";
+        el.style.animationDuration = 18 + Math.random() * 22 + "s";
+        el.style.animationDelay = -Math.random() * 25 + "s";
+        el.style.opacity = 0;
+
+        container.appendChild(el);
+      }
+    })();
+
+    // ===== 3D Carousel (from CodePen style) =====
+    (function () {
+      var radius = 280;
+      var autoRotate = true;
+      var rotateSpeed = -60;
+      var imgWidth = 140;
+      var imgHeight = 190;
+
+      setTimeout(init, 100);
+
+      var obox = document.getElementById('drag-container');
+      var ospin = document.getElementById('spin-container');
+      if (!obox || !ospin) return;
+
+      var aImg = ospin.getElementsByTagName('img');
+      var aEle = [...aImg];
+
+      ospin.style.width = imgWidth + "px";
+      ospin.style.height = imgHeight + "px";
+
+      var ground = document.getElementById('ground');
+      if (ground) {
+        ground.style.width = radius * 3 + "px";
+        ground.style.height = radius * 3 + "px";
+      }
+
+      function init(delayTime) {
+        for (var i = 0; i < aEle.length; i++) {
+          aEle[i].style.transform = "rotateY(" + (i * (360 / aEle.length)) + "deg) translateZ(" + radius + "px)";
+          aEle[i].style.transition = "transform 1s";
+          aEle[i].style.transitionDelay = delayTime || (aEle.length - i) / 4 + "s";
+        }
+      }
+
+      function applyTranform(obj) {
+        if (tY > 180) tY = 180;
+        if (tY < 0) tY = 0;
+        obj.style.transform = "rotateX(" + (-tY) + "deg) rotateY(" + (tX) + "deg)";
+      }
+
+      function playSpin(yes) {
+        ospin.style.animationPlayState = (yes ? 'running' : 'paused');
+      }
+
+      var sX, sY, nX, nY, desX = 0, desY = 0, tX = 0, tY = 10;
+
+      if (autoRotate) {
+        var animationName = (rotateSpeed > 0 ? 'spin' : 'spinRevert');
+        ospin.style.animation = animationName + ' ' + Math.abs(rotateSpeed) + 's infinite linear';
+      }
+
+      function mobilecheck() {
+        var check = false;
+        (function (a) {
+          if (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0, 4))) check = true;
+        })(navigator.userAgent || navigator.vendor || window.opera);
+        return check;
+      }
+
+      if (mobilecheck()) {
+        document.ontouchstart = function (e) {
+          clearInterval(obox.timer);
+          e = e || window.event;
+          var sX = e.touches[0].clientX,
+              sY = e.touches[0].clientY;
+          this.ontouchmove = function (e) {
+            e = e || window.event;
+            var nX = e.touches[0].clientX,
+                nY = e.touches[0].clientY;
+            desX = nX - sX;
+            desY = nY - sY;
+            tX += desX * 0.1;
+            tY += desY * 0.1;
+            applyTranform(obox);
+            sX = nX;
+            sY = nY;
+          };
+          this.ontouchend = function () {
+            this.ontouchmove = this.ontouchend = null;
+            obox.timer = setInterval(function () {
+              desX *= 0.95;
+              desY *= 0.95;
+              tX += desX * 0.1;
+              tY += desY * 0.1;
+              applyTranform(obox);
+              playSpin(false);
+              if (Math.abs(desX) < 0.5 && Math.abs(desY) < 0.5) {
+                clearInterval(obox.timer);
+                playSpin(true);
+              }
+            }, 17);
+          };
+        };
+      } else {
+        document.onmousedown = function (e) {
+          clearInterval(obox.timer);
+          e = e || window.event;
+          var sX = e.clientX,
+              sY = e.clientY;
+          this.onmousemove = function (e) {
+            e = e || window.event;
+            var nX = e.clientX,
+                nY = e.clientY;
+            desX = nX - sX;
+            desY = nY - sY;
+            tX += desX * 0.1;
+            tY += desY * 0.1;
+            applyTranform(obox);
+            sX = nX;
+            sY = nY;
+          };
+          this.onmouseup = function () {
+            this.onmousemove = this.onmouseup = null;
+            obox.timer = setInterval(function () {
+              desX *= 0.95;
+              desY *= 0.95;
+              tX += desX * 0.1;
+              tY += desY * 0.1;
+              applyTranform(obox);
+              playSpin(false);
+              if (Math.abs(desX) < 0.5 && Math.abs(desY) < 0.5) {
+                clearInterval(obox.timer);
+                playSpin(true);
+              }
+            }, 13);
+          };
+          return false;
+        };
+        document.onmousewheel = function (e) {
+          e = e || window.event;
+          var d = e.wheelDelta / 20 || -e.detail;
+          radius += d;
+          init(1);
+        };
+      }
+    })();
+  </script>
+</body>
+</html>
