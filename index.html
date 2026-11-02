@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3D Print Roulette</title>
+<style>
+:root{--bg:#07080f;--gold:#ffd23d;--mu:#8d94ab}
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%;color:#f4f6fb;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg)}
+body:before{content:"";position:fixed;inset:0;z-index:-1;background:radial-gradient(700px 500px at 15% 0%,#5b21b655,transparent),radial-gradient(700px 500px at 90% 10%,#ec489955,transparent),radial-gradient(900px 600px at 50% 110%,#f9731633,transparent)}
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.wall{position:absolute;inset:-60px;display:flex;flex-direction:column;gap:14px;opacity:.17;transform:rotate(-6deg) scale(1.2)}
+.wall .row{display:flex;gap:14px;width:max-content;animation:mv 90s linear infinite}
+.wall .row:nth-child(even){animation-direction:reverse}
+.wall img{width:150px;height:150px;object-fit:cover;border-radius:16px}
+@keyframes mv{to{transform:translateX(-50%)}}
+.bg svg{position:absolute;inset:0;width:100%;height:100%;opacity:.32}
+.bg:after{content:"";position:absolute;left:0;right:0;bottom:0;height:45%;background:repeating-linear-gradient(0deg,#fb923c14 0 2px,transparent 2px 9px);-webkit-mask-image:linear-gradient(transparent,#000);mask-image:linear-gradient(transparent,#000)}
+main{max-width:1040px;margin:0 auto;padding:40px 14px 60px;text-align:center}
+.tag{display:inline-block;padding:6px 14px;border-radius:99px;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);border:1px solid #ffd23d55;background:#ffd23d12}
+h1{margin:16px 0 6px;font-size:clamp(32px,7vw,64px);line-height:1;font-weight:900;letter-spacing:-.02em;background:linear-gradient(90deg,#fb923c,#facc15,#f472b6,#a78bfa);-webkit-background-clip:text;background-clip:text;color:transparent}
+.sub{margin:0 0 30px;color:var(--mu)}
+.stage{position:relative;border-radius:22px;padding:26px 0;background:linear-gradient(#12162a,#0a0c18);border:1px solid #ffffff1c;box-shadow:0 30px 80px #000a,0 0 0 1px #0006 inset;overflow:hidden}
+.stage:before,.stage:after{content:"";position:absolute;top:0;bottom:0;width:20%;z-index:2;pointer-events:none}
+.stage:before{left:0;background:linear-gradient(90deg,#0a0c18,transparent)}
+.stage:after{right:0;background:linear-gradient(-90deg,#0a0c18,transparent)}
+.beam{position:absolute;left:50%;top:0;bottom:0;width:4px;margin-left:-2px;z-index:3;background:linear-gradient(var(--gold),#ff7a18);box-shadow:0 0 22px 4px #ffb300aa}
+.beam:before,.beam:after{content:"";position:absolute;left:-10px;border:10px solid transparent}
+.beam:before{top:-2px;border-top-color:var(--gold)}
+.beam:after{bottom:-2px;border-bottom-color:var(--gold)}
+.strip{display:flex;gap:12px;min-height:210px;will-change:transform}
+.it{flex:0 0 168px;height:210px;border-radius:14px;background:#171c33;overflow:hidden;position:relative;border:1px solid #ffffff14;border-bottom:5px solid var(--r);box-shadow:inset 0 -50px 50px -35px var(--r)}
+.it img{width:100%;height:136px;object-fit:cover;display:block;background:#0004}
+.it .t{font-size:12px;line-height:1.25;padding:8px 8px 0;color:#e4e8f5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;text-align:left}
+.it .p{position:absolute;right:6px;top:6px;font-size:11px;font-weight:800;padding:2px 7px;border-radius:99px;background:#000a;color:var(--gold)}
+.it.w{transform:scale(1.04);box-shadow:0 0 36px var(--r);border-color:var(--r)}
+#go{position:relative;margin-top:34px;font-size:22px;font-weight:900;letter-spacing:.14em;text-transform:uppercase;color:#fff;border:0;border-radius:16px;padding:20px 70px;cursor:pointer;background:linear-gradient(135deg,#fb923c,#ec4899 60%,#8b5cf6);box-shadow:0 14px 40px #ec489966;transition:transform .15s}
+#go:hover:not(:disabled){transform:translateY(-3px) scale(1.04)}
+#go:disabled{opacity:.55;cursor:default}
+.cnt{margin-top:16px;font-size:13px;color:var(--mu)}
+#ov{position:fixed;inset:0;background:#000c;backdrop-filter:blur(6px);display:none;align-items:center;justify-content:center;z-index:9;padding:16px}
+#ov.on{display:flex}
+.box{position:relative;width:min(440px,100%);background:#12162a;border-radius:22px;padding:18px;border:2px solid var(--r);box-shadow:0 0 90px var(--r);animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{from{transform:scale(.5) rotate(-4deg);opacity:0}}
+.box .rt{display:inline-block;margin-bottom:10px;padding:4px 14px;border-radius:99px;font-size:12px;font-weight:800;letter-spacing:.18em;text-transform:uppercase;background:var(--r);color:#000}
+.box img{width:100%;max-height:300px;object-fit:cover;border-radius:14px;display:block}
+.box h2{font-size:19px;margin:14px 0 4px}
+.box .pr{color:var(--gold);font-weight:900;font-size:22px}
+.box a.b{display:block;margin-top:16px;padding:15px;border-radius:14px;background:linear-gradient(135deg,#fb923c,#ec4899);color:#fff;text-decoration:none;font-weight:800;letter-spacing:.04em}
+.box small{display:block;margin-top:10px;color:var(--mu)}
+.box button{all:unset;cursor:pointer;color:var(--mu);margin-top:8px;font-size:13px;text-decoration:underline}
+.cf{position:fixed;top:-12px;width:9px;height:14px;z-index:10;animation:fall linear forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(720deg);opacity:.8}}
+</style>
+</head>
+<body>
+<div class="bg"><svg viewBox="0 0 1000 600" preserveAspectRatio="xMidYMax slice" fill="none" stroke-width="2">
+<defs><pattern id="L" width="8" height="6" patternUnits="userSpaceOnUse"><rect width="8" height="3.5" fill="#fb923c"/><rect y="3.5" width="8" height="2.5" fill="#c2410c"/></pattern></defs>
+<g stroke="#a78bfa">
+<rect x="288" y="150" width="12" height="364"/><rect x="700" y="150" width="12" height="364"/>
+<rect x="288" y="150" width="424" height="12"/><rect x="270" y="500" width="460" height="16"/>
+<rect x="300" y="296" width="400" height="8"/></g>
+<rect x="470" y="500" width="100" height="0" fill="url(#L)"><animate attributeName="y" values="500;342;342;500" keyTimes="0;.8;.92;1" dur="9s" repeatCount="indefinite"/><animate attributeName="height" values="0;158;158;0" keyTimes="0;.8;.92;1" dur="9s" repeatCount="indefinite"/></rect>
+<g stroke="#f472b6"><rect x="330" y="284" width="40" height="34"/><path d="M340 318 L360 318 L350 342 Z" fill="#f472b6"/>
+<animateTransform attributeName="transform" type="translate" values="0 0;170 0;0 0" dur="3s" repeatCount="indefinite"/></g>
+<g stroke="#38bdf8"><circle cx="130" cy="260" r="62"/><circle cx="130" cy="260" r="20"/><circle cx="870" cy="300" r="48"/><circle cx="870" cy="300" r="14"/>
+<path d="M192 260 Q250 300 330 290"/><path d="M822 300 Q760 330 700 300"/></g>
+</svg></div>
+<main>
+<span class="tag">3D Print Roulette</span>
+<h1>What Should We Print Today?</h1>
+<p class="sub" id="sub">Loading...</p>
+<div class="stage"><div class="beam"></div><div class="strip" id="strip"></div></div>
+<button id="go" disabled>printing</button>
+<div class="cnt" id="cnt"></div>
+</main>
+<div id="ov"><div class="box" id="box"></div></div>
+<script>
+var B="https://payhip.com/b/",P=[],busy=false,timer,ac;
+var strip=document.getElementById("strip"),go=document.getElementById("go"),ov=document.getElementById("ov"),box=document.getElementById("box"),sub=document.getElementById("sub"),cnt=document.getElementById("cnt");
+var W=180,spins=0;
+function U(s){if(/^https?:/.test(s))return s;if(s.slice(0,2)=="g:")return"https://images.payhip.com/o_"+s.slice(2)+".gif";return"https://payhip.com/cdn-cgi/image/format=auto,width=750/https://pe56d.s3.amazonaws.com/o_"+s.slice(2)}
+function T(p){return p.title.replace(/^3D Printed\s+/i,"")}
+function R(p){var x=p.price;return x>=3?["#ffd23d","Legendary"]:x>=2.5?["#eb4b4b","Mythic"]:x>=2?["#d32ce6","Epic"]:x>=1.5?["#8847ff","Rare"]:["#4b69ff","Common"]}
+function shuf(a){a=a.slice();for(var i=a.length-1;i>0;i--){var j=Math.floor(Math.random()*(i+1)),t=a[i];a[i]=a[j];a[j]=t}return a}
+function cell(p){var d=document.createElement("div");d.className="it";d.style.setProperty("--r",R(p)[0]);
+var im=document.createElement("img");im.referrerPolicy="no-referrer";im.src=U(p.img);im.alt="";d.appendChild(im);
+var pr=document.createElement("span");pr.className="p";pr.textContent="$"+p.price.toFixed(2);d.appendChild(pr);
+var t=document.createElement("div");t.className="t";t.textContent=T(p);d.appendChild(t);return d}
+function wall(){var w=document.createElement("div");w.className="wall";
+ for(var r=0;r<8;r++){var row=document.createElement("div");row.className="row";var l=shuf(P).slice(0,20);l=l.concat(l);
+  l.forEach(function(p){var im=document.createElement("img");im.referrerPolicy="no-referrer";im.src=U(p.img);im.alt="";row.appendChild(im)});
+  w.appendChild(row)}
+ var bg=document.querySelector(".bg");bg.insertBefore(w,bg.firstChild)}
+function build(l){strip.innerHTML="";l.forEach(function(p){strip.appendChild(cell(p))})}
+fetch("products.json?t="+Date.now()).then(function(r){return r.json()}).then(function(d){
+ P=d;build(shuf(P).concat(shuf(P)));go.disabled=false;wall();
+ sub.textContent="Press the button and let the roulette pick your product";cnt.textContent=P.length+" products in the roulette";
+}).catch(function(){sub.textContent="Could not load products.json"});
+function tick(f){try{ac=ac||new(window.AudioContext||window.webkitAudioContext)();var o=ac.createOscillator(),g=ac.createGain();o.frequency.value=f||700;o.type="square";g.gain.value=.04;o.connect(g);g.connect(ac.destination);o.start();g.gain.exponentialRampToValueAtTime(.0001,ac.currentTime+.06);o.stop(ac.currentTime+.07)}catch(e){}}
+function confetti(c){for(var i=0;i<70;i++){var e=document.createElement("i");e.className="cf";e.style.left=Math.random()*100+"vw";e.style.background=i%3?c:"#fff";e.style.animationDuration=(2+Math.random()*2)+"s";e.style.animationDelay=Math.random()*.6+"s";document.body.appendChild(e);setTimeout(function(x){x.remove()},5000,e)}}
+function show(p){
+ var u=B+p.id,r=R(p);box.style.setProperty("--r",r[0]);
+ box.innerHTML='<span class="rt">'+r[1]+'</span><img referrerpolicy="no-referrer" src="'+U(p.img)+'" alt=""><h2></h2><div class="pr">$'+p.price.toFixed(2)+'</div><a class="b" href="'+u+'">Open product →</a><small>Redirecting in <span id="c">5</span>s...</small><button id="x">Close</button>';
+ box.querySelector("h2").textContent=T(p);ov.classList.add("on");confetti(r[0]);tick(1000);setTimeout(function(){tick(1300)},120);
+ var n=5;clearInterval(timer);timer=setInterval(function(){n--;var c=document.getElementById("c");if(c)c.textContent=n;if(n<=0){clearInterval(timer);try{window.top.location.href=u}catch(e){location.href=u}}},1000);
+ document.getElementById("x").onclick=function(){clearInterval(timer);ov.classList.remove("on")};
+}
+go.onclick=function(){
+ if(busy||!P.length)return;busy=true;go.disabled=true;tick(500);
+ var win=P[Math.floor(Math.random()*P.length)];
+ var N=55,list=[];while(list.length<N+10)list=list.concat(shuf(P));list=list.slice(0,N+10);list[N]=win;
+ build(list);strip.style.transition="none";strip.style.transform="translateX(0)";
+ var half=strip.parentElement.clientWidth/2,jit=(Math.random()-.5)*110;
+ void strip.offsetWidth;
+ strip.style.transition="transform 7.5s cubic-bezier(.08,.6,.12,1)";
+ strip.style.transform="translateX("+(-(N*W+84-half+jit))+"px)";
+ var last=-1;(function loop(){if(!busy)return;var m=new DOMMatrix(getComputedStyle(strip).transform),i=Math.floor((-m.m41+half)/W);if(i!=last){last=i;tick(600+(i%3)*60)}requestAnimationFrame(loop)})();
+ setTimeout(function(){strip.children[N].classList.add("w");setTimeout(function(){busy=false;go.disabled=false;spins++;show(win)},800)},7600);
+};
+</script>
+</body>
+</html>
